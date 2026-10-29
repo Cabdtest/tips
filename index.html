@@ -393,6 +393,17 @@ const DEFAULT_CATS = [
 ];
 const OTRA = { id: "otra", nombre: "Otra (si no encontrás la que buscás)" };
 const SIN_CAT = "sin";
+// Aviso al celular del admin (app ntfy). El canal es público: el mensaje no lleva el contenido del tip.
+const NTFY_TOPIC = "tips-caseros-c51800800a5e";
+function avisarNuevoTip() {
+  fetch("https://ntfy.sh/", {
+    method: "POST",
+    body: JSON.stringify({
+      topic: NTFY_TOPIC, title: "Llegó un tip nuevo", tags: ["bulb"],
+      message: "Entrá al panel para revisarlo.", click: "https://cabdtest.github.io/tips/#admin"
+    })
+  }).catch(() => {});
+}
 
 const ICONS = {
   ropa: '<path d="M8 3 3 6l2 4 2-1v11h10V9l2 1 2-4-5-3a4 4 0 0 1-8 0Z"/>',
@@ -629,6 +640,7 @@ $("form-tip").addEventListener("submit", async e => {
       autorId: uid, creado: serverTimestamp(), estado: "pendiente"
     });
     setDoc(doc(db, "stats", "envios"), { n: increment(1) }, { merge: true }).catch(() => {});
+    avisarNuevoTip();
     $("f-titulo").value = ""; $("f-texto").value = ""; $("f-catnueva").value = "";
     msg.className = "msg ok"; msg.textContent = S.cerrado
       ? "¡Gracias! Muy pronto vas a tener novedades. Si tenés otro, mandalo también."
